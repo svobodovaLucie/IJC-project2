@@ -54,35 +54,42 @@ int tail_plus(FILE *file, long int num) {
     return 0;
 }
 
-/*
 int tail(FILE *file, long int num) {
-    // naalokovat buffer pro n radku
-    // dynamicka alokace - prvne row, pak cells
-
-    // prochazet file, ukladat radek
-    char *buffer = calloc(num - 1, 1);
+    char **buffer = (char**)calloc(num, sizeof(char*));
     if (buffer == NULL) {
-        fprintf(stderr, "Nedostatek pameti.\n");
+        fprintf(file, "Error: Not enough space for memmory allocation.\n");
         return -1;
     }
     for (unsigned i = 0; i < num; i++) {
-        buffer[i] = calloc(MAX_CHARS - 1, 1);
+        buffer[i] = (char*)calloc(MAX_CHARS, 1);
         if (buffer[i] == NULL) {
-            fprintf(stderr, "Nedostatek pameti.\n");
-            // free alokovane
-            for (; i >= 0; i--) {
-                free(buffer[i]);
-            }
-            return -1;
+            fprintf(file, "Error: Not enough space for memmory allocation (row number %ul)\n", i);
+            //table_free();
         }
     }
 
-    for (unsigned i = 0; i < num; i++) {
-        free(buffer[i]);
+    unsigned num_of_line = 0;
+    while (fgets(buffer[num_of_line % num], MAX_CHARS-1, file) != NULL) {
+        if (buffer[num_of_line % num][strlen(buffer[num_of_line % num]) - 1] != '\n') {
+            fprintf(stderr, "Moc dlouhe radky.\n");
+            int c;
+            while ((c = fgetc(file)) != '\n') {
+                ;    // prazdny cyklus
+            }
+            buffer[num_of_line % num][strlen(buffer[num_of_line % num])] = '\n';
+            //buffer[num_of_line % num][strlen(buffer[num_of_line % num])] = '\0';
+        }
+        num_of_line++;
+        //memset(buffer[num_of_line % num], '\0', MAX_CHARS);
     }
+    unsigned j = num_of_line % num;
+    do {
+        printf("%s", buffer[j % num]);
+        j++;
+    } while ((j % num) != (num_of_line % num));
 
+    return 0;
 }
-*/
 
 int main(int argc, char *argv[]) {
     FILE *file = stdin;
@@ -123,13 +130,12 @@ int main(int argc, char *argv[]) {
             return -1;
         }
     } 
-    /*
     else {
         if (tail(file, num)) {
             return -1;
         }
     }
-    */
+    
 
     return 0;
 }
