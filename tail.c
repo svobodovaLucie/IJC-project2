@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_CHARS 511
+#define MAX_CHARS 512
 #define DEF_LINES 10
 
 #define ABS(n) ((n < 0) ? (-n) : (n))
