@@ -41,17 +41,26 @@ int number_check(char *num_str, long *num) {
     return 0;
 }
 
-int tail_plus(FILE *file, long int num) {
+// Function frees the first "to_free" elements in buffer
+void buffer_free(char **buffer, unsigned to_free) {
+    for (unsigned i = 0; i < to_free; i++) {
+        free(buffer[i]);
+    }
+    free(buffer);
+}
+
+// Function prints lines starting from line number "num"
+void tail_plus(FILE *file, long int num) {
     char buffer[MAX_CHARS] = {0};
     unsigned line = 0;
 
     while (fgets(buffer, MAX_CHARS - 1, file) != NULL) {
         if (buffer[strlen(buffer) - 1] != '\n') {
             fprintf(stderr, "Max length of a line is %d characters (line %u is longer).\n", MAX_CHARS - 1, line);
-            do {
-                fseek(file, 1, SEEK_CUR);
+            int c;
+            while ((c = fgetc(file)) != '\n') {
+               ; // empty loop
             }
-            while (fgetc(file) != '\n');
             buffer[strlen(buffer)] = '\n';
         }
         if (line >= num - 1) {
@@ -60,30 +69,25 @@ int tail_plus(FILE *file, long int num) {
         memset(buffer, '\0', MAX_CHARS);
         line++;
     }
-    return 0;
 }
 
-void buffer_free(char **buffer, unsigned to_free) {
-    for (unsigned i = 0; i < to_free; i++) {
-        free(buffer[i]);
-    }
-    free(buffer);
-}
-
+// Function prints the last "num" of lines
+// returns 0 when successful
+// returns -1 if not enough space for memory allocation - nothing is printed
 int tail(FILE *file, long int num) {
     char **buffer = (char**)calloc(num, sizeof(char*));
     if (buffer == NULL) {
-        fprintf(file, "Error: Not enough space for memmory allocation.\n");
+        fprintf(file, "Error: Not enough space for memory allocation.\n");
         return -1;
     }
     for (unsigned i = 0; i < num; i++) {
         buffer[i] = (char*)calloc(MAX_CHARS, 1);
         if (buffer[i] == NULL) {
-            fprintf(file, "Error: Not enough space for memmory allocation (row number %ul)\n", i);
+            fprintf(file, "Error: Not enough space for memory allocation (row number %ul)\n", i);
             buffer_free(buffer, i);
+            return -1;
         }
     }
-
     unsigned num_of_line = 0;
     while (fgets(buffer[num_of_line % num], MAX_CHARS-1, file) != NULL) {
         if (buffer[num_of_line % num][strlen(buffer[num_of_line % num]) - 1] != '\n') {
@@ -93,10 +97,8 @@ int tail(FILE *file, long int num) {
                 ;    // prazdny cyklus
             }
             buffer[num_of_line % num][strlen(buffer[num_of_line % num])] = '\n';
-            //buffer[num_of_line % num][strlen(buffer[num_of_line % num])] = '\0';
         }
         num_of_line++;
-        //memset(buffer[num_of_line % num], '\0', MAX_CHARS);
     }
     unsigned j = num_of_line % num;
     do {
@@ -105,7 +107,6 @@ int tail(FILE *file, long int num) {
     } while ((j % num) != (num_of_line % num));
 
     buffer_free(buffer, num);
-
     return 0;
 }
 
@@ -114,27 +115,25 @@ int main(int argc, char *argv[]) {
     long int num;
 
     // parse arguments
-    switch (argc)
-    {
+    switch (argc) {
     case 1:
+        num = 10;
         break;
     case 2:
         if ((file = fopen(argv[1], "r")) == NULL) {
             fprintf(stderr, "Error: The file doesn't exist.\n");
             return 1;
         }
+        num = 10;
         break;
     case 3:
     case 4:
         if (!strcmp(argv[1], "-n")) {
             int num_check_res = number_check(argv[2], &num);
-            if (num_check_res == -1) {
-                // error fprintf is in the number function
-                //fprintf(stderr, "Error: Invalid arguments yyy.\n");
+            if (num_check_res == -1) {  // invalid arguments
                 return 1;
             }
-            if (num_check_res == 1) {
-                // 0 lines to be printed
+            if (num_check_res == 1) {   // 0 lines to be printed
                 return 0;
             }
         } else {
@@ -153,14 +152,13 @@ int main(int argc, char *argv[]) {
         break;
     }
 
-    /////////////////////////////
-    if (num <= 0) {
-        if (tail_plus(file, ABS(num))) {
-            return -1;
-        }
+    // tail functions
+    if (num <= 0) { // prints lines starting from line "num"
+        tail_plus(file, ABS(num));
     } 
-    else {
+    else {          // prints last "num" lines
         if (tail(file, num)) {
+            fclose(file);
             return -1;
         }
     }
