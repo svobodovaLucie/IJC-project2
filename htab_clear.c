@@ -17,6 +17,7 @@ void htab_clear(htab_t * t) {
             free(tmp->pair.key);
             free(tmp);
         }
+        t->arr[i] = NULL;
     }
     t->size = 0;
 }
