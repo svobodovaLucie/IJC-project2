@@ -11,6 +11,7 @@
  * @param key klic, podle ktereho se zaznam vyhleda
  * @return pokud je zaznam nalezen, vrátí ukazatel na záznam, jinak vrátí NULL
  */
+
 htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
     size_t index = htab_hash_function(key) % t->arr_size;
     size_t key_len = strlen(key);
