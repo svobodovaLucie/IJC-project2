@@ -1,23 +1,8 @@
-#include "htab.h"
-#include "htab_structs.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 
-// ptr=htab_lookup_add(t,key)
-
-// vyhledávání+přidání - viz dále
-// Když htab_init nebo htab_lookup_add nemohou alokovat paměť,
-// vrací NULL (a uživatel musí testovat výsledek těchto operací)
-/*
-Funkce
-htab_pair_t htab_lookup_add(htab_t *t, htab_key_t key);
-V tabulce  t  vyhledá záznam odpovídající řetězci  key  a
-- pokud jej nalezne, vrátí ukazatel na záznam
-- pokud nenalezne, automaticky přidá záznam a vrátí ukazatel
-Poznámka: Dobře promyslete chování této funkce k parametru key.
-Poznámka: podobně se chová C++ operator[] pro std::unordered_map
-*/
+#include "htab.h"
+#include "htab_structs.h"
 
 /**
  * @brief v tabulce  t  vyhledá záznam odpovídající řetězci  key
@@ -27,139 +12,60 @@ Poznámka: podobně se chová C++ operator[] pro std::unordered_map
  * @return pokud je zaznam nalezen, vrátí ukazatel na záznam, jinak vrátí NULL
  */
 htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
-    size_t index = (htab_hash_function(key) % t->arr_size);
-    htab_item_t *item;
-    htab_item_t *prev = NULL;
-    for (item = t->arr[index]; item != NULL; item = item->next) {
-        if (!strcmp(item->pair.key, key)) {
-            item->pair.value++;
-            return &(item->pair);
+    size_t index = htab_hash_function(key) % t->arr_size;
+    size_t key_len = strlen(key);
+    bool greater = false;
+    struct htab_item * item = t->arr[index];
+    if (item != NULL) {
+        size_t item_len = strlen(item->pair.key);
+        if (item_len > key_len) {
+            greater = true;
         }
-        prev = item;
+        for(; item->next != NULL; item = item->next){
+            item_len = strlen(item->pair.key);
+            if(item_len == key_len && strncmp(key, item->pair.key, item_len) == 0) {
+                item->pair.value++; 
+                return &(item->pair);
+            }
+            if (strlen(item->next->pair.key) > key_len) {
+                greater = true;
+                break;
+            }
+        }
+        if (!greater) {
+            item_len = strlen(item->pair.key);
+            if(item_len == key_len && strncmp(key, item->pair.key, item_len) == 0) {
+                item->pair.value++;
+                return &(item->pair);
+            }
+        }
     }
-    htab_item_t *new = malloc(sizeof(htab_item_t));
-    if (new == NULL) {
-        fprintf(stderr, "Error: htab_lookup_add: Not enough space for memory allocation.\n");
+    struct htab_item *new = malloc(sizeof(struct htab_item));
+    if(new == NULL){
         return NULL;
     }
-    new->next = NULL;
-    
-    // TODO - this block is quite suspicious
-    new->pair.key = malloc(strlen(key)+1);
-    if (new->pair.key == NULL) {
-       free(new);
-       fprintf(stderr, "Error: lookup: Chyba alokace pameti.\n");
-       return NULL;
-    } 
-    memcpy(new->pair.key, key, strlen(key)+1);  // TODO - memcpy warnings - pointer types
-    
+    if ((new->pair.key = malloc(key_len + 1)) == NULL) {
+        free(new);
+        return NULL;
+    }
+    memcpy(new->pair.key, key, key_len + 1);
     new->pair.value = 1;
-    if (prev == NULL) {
+
+    if (greater) {
+        new->next = item->next;
+    } else {
+        new->next = NULL;
+    }
+
+    if (t->arr[index] == NULL) {
+        t->arr[index] = new;
+    } else if (greater && item == t->arr[index]) {
+        new->next = item;
         t->arr[index] = new;
     } else {
-        prev->next = new;
+        item->next = new;
     }
+    
     t->size++;
     return &(new->pair);
 }
-
-
-/*
-htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
-    size_t index = (htab_hash_function(key) % t->arr_size);
-    htab_item_t *item;
-    htab_item_t *prev = NULL;
-    for (item = t->arr[index]; item != NULL; item = item->next) {
-        if (!strcmp(item->pair.key, key)) {
-            item->pair.value++;
-            return &(item->pair);
-        }
-        prev = item;
-    }
-    htab_item_t *new = malloc(sizeof(htab_item_t));
-    if (new == NULL) {
-        fprintf(stderr, "Error: htab_lookup_add: Not enough space for memory allocation.\n");
-        return NULL;
-    }
-    new->next = NULL;
-    new->pair.key = key;
-    new->pair.value = 1;
-    if (prev == NULL) {
-        t->arr[index] = new;
-    } else {
-        prev->next = new;
-    }
-    t->size++;
-    return &(new->pair);
-}
-*/
-
-/*
-htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
-    size_t index = (htab_hash_function(key) % t->arr_size);
-    htab_item_t *item;
-    for (item = t->arr[index]; item != NULL; item = item->next) {
-        if (!strcmp(item->pair.key, key)) {
-            item->pair.value++;
-            return &(item->pair);
-        }
-    }
-    htab_item_t *new = malloc(sizeof(htab_item_t));
-    if (new == NULL) {
-        fprintf(stderr, "Error: htab_lookup_add: Not enough space for memory allocation.\n");
-        return NULL;
-    }
-    new->next = NULL;
-    new->pair.key = key;
-    new->pair.value = 1;
-    t->arr[index] = new;
-    t->size++;
-    return &(new->pair);
-}
-*/
-/*
-htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
-    size_t index = (htab_hash_function(key) % t->arr_size);
-    for (htab_item_t *item = t->arr[index]; item != NULL; item = item->next) {
-        if (!strcmp(item->pair.key, key)) {
-            item->pair.value++;
-            return &(item->pair);
-        }
-    }
-    htab_item_t *new = malloc(sizeof(htab_item_t));
-    new->next = NULL;
-    new->pair.key = key;
-    new->pair.value = 1;
-    return &(new->pair);
-}
-
-*/
-
-/*
-htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
-    unsigned index = (htab_hash_function(key) % t->arr_size);
-    struct htab_item *i = t->arr[index];
-    for (; i != NULL; i = i->next) {
-        if (!strcmp(i->pair.key, key)) {
-            // nasli jsme ji
-            printf("Zaznam uz tam je");
-            return &(i->pair);  // WTFFFFFFFFFF &
-        }
-        if (i->next == NULL) {
-            // nenasli jsme, musime pridat -> jsme na konci toho seznamu, takze muzeme pridat na konec
-            break;  
-        }
-    }
-    htab_item_t *new = malloc(sizeof(htab_item_t));
-    if (new == NULL) {
-        fprintf(stderr, "Error: htab_lookup_add: Not enough space for memory allocation");
-        return NULL;
-    }
-    new->pair.key = key;
-    new->pair.value = 1;
-    new->next = NULL;
-    i->next = new;
-    printf("Pridali jsme novy zaznam.");
-    return &(new->pair);
-}
-*/
