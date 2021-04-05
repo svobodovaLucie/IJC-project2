@@ -28,14 +28,17 @@
 
 int read_word(char *s, int max, FILE *f) {
     if (max > MAX_LEN) {
-        fprintf(stderr, "Max length of a word is %d characters (programme limit).\n", MAX_LEN);
+        fprintf(stderr, "Max length of a word is %d characters (limit).\n", MAX_LEN);
         max = MAX_LEN;
     }
     int i = 0;
     int c = fgetc(f);
 
+    while (isspace(c)) {    // cyklus preskace vsechny bile znaky
+        c = fgetc(f);
+    }
+
     while(!isspace(c) && c != EOF && i <= max) {
-        
         s[i++] = c;
         c = fgetc(f);
     }

@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "htab.h"
 #include "htab_structs.h"
 
@@ -11,6 +10,7 @@
  * @param key klic, podle ktereho se zaznam vyhleda
  * @return pokud je zaznam nalezen, vrátí ukazatel na záznam, jinak vrátí NULL
  */
+
 
 htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
     size_t index = htab_hash_function(key) % t->arr_size;
@@ -25,7 +25,6 @@ htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
         for(; item->next != NULL; item = item->next){
             item_len = strlen(item->pair.key);
             if(item_len == key_len && strncmp(key, item->pair.key, item_len) == 0) {
-                item->pair.value++; 
                 return &(item->pair);
             }
             if (strlen(item->next->pair.key) > key_len) {
@@ -36,7 +35,6 @@ htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
         if (!greater) {
             item_len = strlen(item->pair.key);
             if(item_len == key_len && strncmp(key, item->pair.key, item_len) == 0) {
-                item->pair.value++;
                 return &(item->pair);
             }
         }
@@ -49,8 +47,8 @@ htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
         free(new);
         return NULL;
     }
-    memcpy(new->pair.key, key, key_len + 1);
-    new->pair.value = 1;
+    memcpy((char *)new->pair.key, key, key_len + 1);
+    new->pair.value = 0;
 
     if (greater) {
         new->next = item->next;
