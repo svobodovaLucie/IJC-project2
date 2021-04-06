@@ -4,41 +4,29 @@
 #include "htab_structs.h"
 
 /**
- * @brief v tabulce  t  vyhledá záznam odpovídající řetězci  key
+ * @brief Funkce v tabulce t vyhledá záznam odpovídající řetězci key
  * 
- * @param t tabulka, ve ktere se ma zaznam vyhledat
- * @param key klic, podle ktereho se zaznam vyhleda
- * @return pokud je zaznam nalezen, vrátí ukazatel na záznam, jinak vrátí NULL
+ * @param t tabulka, ve které se má záznam vyhledat
+ * @param key klíč, podle kterého je záznam vyhledán
+ * @return pokud je záznam nalezen, vrací ukazatel na záznam, jinak vrací NULL
  */
-
-
 htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
+    if (t == NULL || key == NULL) {
+        return NULL;
+    }
     size_t index = htab_hash_function(key) % t->arr_size;
     size_t key_len = strlen(key);
-    bool greater = false;
-    struct htab_item * item = t->arr[index];
-    if (item != NULL) {
+    struct htab_item *item = t->arr[index];
+    if (item != NULL) { // první položka pole na vypočteném indexu není prázdná
         size_t item_len = strlen(item->pair.key);
-        if (item_len > key_len) {
-            greater = true;
-        }
-        for(; item->next != NULL; item = item->next){
+        for(; item != NULL; item = item->next){   // průchod seznamem a hledání daného klíče
             item_len = strlen(item->pair.key);
-            if(item_len == key_len && strncmp(key, item->pair.key, item_len) == 0) {
-                return &(item->pair);
-            }
-            if (strlen(item->next->pair.key) > key_len) {
-                greater = true;
-                break;
-            }
-        }
-        if (!greater) {
-            item_len = strlen(item->pair.key);
-            if(item_len == key_len && strncmp(key, item->pair.key, item_len) == 0) {
-                return &(item->pair);
+            if(item_len == key_len && !strncmp(key, item->pair.key, item_len)) {
+                return &(item->pair);   // pokud je položka nalezena, je vrácen ukazatel na ni
             }
         }
     }
+    // hledaný prvek nebyl nalezen - bude vytvořen nový
     struct htab_item *new = malloc(sizeof(struct htab_item));
     if(new == NULL){
         return NULL;
@@ -49,17 +37,9 @@ htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
     }
     memcpy((char *)new->pair.key, key, key_len + 1);
     new->pair.value = 0;
-
-    if (greater) {
-        new->next = item->next;
-    } else {
-        new->next = NULL;
-    }
+    new->next = NULL;
 
     if (t->arr[index] == NULL) {
-        t->arr[index] = new;
-    } else if (greater && item == t->arr[index]) {
-        new->next = item;
         t->arr[index] = new;
     } else {
         item->next = new;
