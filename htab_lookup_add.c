@@ -1,8 +1,11 @@
-#include <stdio.h>
+// htab_lookup_add.c
+// Řešení IJC-DU2, příklad b), 08.04.2021
+// Autor: Lucie Svobodová, FIT
+// Přeloženo: gcc 9.3.0
+
 #include <stdlib.h>
 #include "htab.h"
 #include "htab_structs.h"
-
 /**
  * @brief Funkce v tabulce t vyhledá záznam odpovídající řetězci key
  * 
@@ -11,22 +14,21 @@
  * @return pokud je záznam nalezen, vrací ukazatel na záznam, jinak vrací NULL
  */
 htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
-    if (t == NULL || key == NULL) {
-        return NULL;
-    }
     size_t index = htab_hash_function(key) % t->arr_size;
     size_t key_len = strlen(key);
     struct htab_item *item = t->arr[index];
-    if (item != NULL) { // první položka pole na vypočteném indexu není prázdná
-        size_t item_len = strlen(item->pair.key);
-        for(; item != NULL; item = item->next){   // průchod seznamem a hledání daného klíče
-            item_len = strlen(item->pair.key);
-            if(item_len == key_len && !strncmp(key, item->pair.key, item_len)) {
-                return &(item->pair);   // pokud je položka nalezena, je vrácen ukazatel na ni
+    if (item != NULL) {     // seznam začínající na daném indexu není prázdný
+        // prohledání seznamu, zda hledaný prvek již neexistuje
+        for(; item->next != NULL; item = item->next){
+            if(strlen(item->pair.key) == key_len && !strcmp(key, item->pair.key)) {
+                return &(item->pair);
             }
         }
+        if(strlen(item->pair.key) == key_len && !strcmp(key, item->pair.key)) {
+            return &(item->pair);
+        }
     }
-    // hledaný prvek nebyl nalezen - bude vytvořen nový
+    // vytvoření nového prvku
     struct htab_item *new = malloc(sizeof(struct htab_item));
     if(new == NULL){
         return NULL;
@@ -39,12 +41,12 @@ htab_pair_t * htab_lookup_add(htab_t *t, htab_key_t key) {
     new->pair.value = 0;
     new->next = NULL;
 
+    // přiřazení prvku na správné místo
     if (t->arr[index] == NULL) {
         t->arr[index] = new;
     } else {
         item->next = new;
     }
-    
     t->size++;
     return &(new->pair);
 }

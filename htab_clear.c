@@ -1,11 +1,15 @@
+// htab_clear.c
+// Řešení IJC-DU2, příklad b), 08.04.2021
+// Autor: Lucie Svobodová, FIT
+// Přeloženo: gcc 9.3.0
+
 #include <stdlib.h>
 #include "htab.h"
 #include "htab_structs.h"
-
 /**
- * @brief zrušení všech položek, tabulka zůstane prázdná
+ * @brief Funkce zruší všechny položky tabulky t (tabulka zůstane prázdná).
  * 
- * @param t hashovaci tabulka, jejiz zaznamy se maji smazat
+ * @param t hashovací tabulka, jejíž záznamy mají být smazány
  * @return void
  */
 void htab_clear(htab_t * t) {

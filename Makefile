@@ -10,9 +10,6 @@ all: $(EXEC) libhtab.so libhtab.a
 tail: tail.o
 	$(CC) $(CFLAGS) $^ -o $@
 
-wordcc:
-	g++ -std=c++17 -pedantic -Wall wordcount.cc
-
 wordcount-dynamic: wordcount.o io.o libhtab.so
 	$(CC) $(CFLAGS) $^ -o $@
 wordcount: wordcount.o io.o libhtab.a
@@ -22,7 +19,7 @@ wordcount.o: wordcount.c
 io.o: io.c io.h
 	$(CC) $(CFLAGS) -c $<
 
-# object files
+# object files for wordcount
 htab_bucket_count.o: htab_bucket_count.c $(LIBS)
 	$(CC) $(CFLAGS) -fPIC -c $<
 

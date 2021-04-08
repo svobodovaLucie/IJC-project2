@@ -1,11 +1,16 @@
-#include "htab.h"
-#include <stdint.h>
+// htab_hash_function.c
+// Řešení IJC-DU2, příklad b), 08.04.2021
+// Autor: Lucie Svobodová, FIT
+// Přeloženo: gcc 9.3.0
+// Funkce převzata ze zadání úkolu
 
+#include <stdint.h>
+#include "htab.h"
 /**
- * @brief hash function
+ * @brief Hashovací funkce.
  * 
- * @param str string to be hashed
- * @return hash result
+ * @param str Řetězec k zaheshování
+ * @return výsledek hashovací funkce
  */
 size_t htab_hash_function(const char *str) {
     uint32_t h=0;     // musí mít 32 bitů
