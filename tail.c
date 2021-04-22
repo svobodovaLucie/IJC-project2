@@ -79,7 +79,7 @@ void tail_plus(FILE *file, long int num) {
                 longer_line = true;
             }
             int c;
-            while ((c = fgetc(file)) != '\n') {
+            while ((c = fgetc(file)) != '\n' && c != EOF) {
                ; // prázdný cyklus
             }
             buffer[strlen(buffer)] = '\n';
@@ -123,7 +123,7 @@ int tail(FILE *file, long int num) {
                 longer_line = true;
             }
             int c;
-            while ((c = fgetc(file)) != '\n') {
+            while ((c = fgetc(file)) != '\n' && c != EOF) {
                 ;    // prázdný cyklus
             }
             buffer[num_of_line % num][strlen(buffer[num_of_line % num])] = '\n';

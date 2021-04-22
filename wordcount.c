@@ -4,6 +4,7 @@
 // Přeloženo: gcc 9.3.0
 
 #include <stdio.h>
+#include <stdint.h>
 #include "htab.h"
 #include "io.h"
 
@@ -25,6 +26,7 @@
 #define HTAB_MOVE_SIZE 24571    // počet prvků pole tabulky testované v htab_move()
 #define MAX_CHAR 128            // maximální délka slova (včetně koncové '\0')
 //#define MOVETEST
+//#define HASHTEST
 
 /**
  * @brief Funkce vytiskne slovo a jeho počet výskytů.
@@ -35,6 +37,24 @@
 void print_info_about_word (htab_pair_t *data) {
     printf("%s\t%u\n", data->key, data->value);
 }
+
+#ifdef HASHTEST
+/**
+ * @brief Hashovací funkce na testování použití vlastní hash funkce. Na vyzkoušení testu
+ *        jsem pouze upravila funkci ze zadání.
+ * 
+ * @param str Řetězec k zaheshování
+ * @return výsledek hashovací funkce
+ */
+size_t htab_hash_function(const char *str) {
+    uint32_t h=0;     // musí mít 32 bitů
+    const unsigned char *p;
+    for(p=(const unsigned char*)str; *p!='\0'; p++)
+        h = (12345)*h + *p;
+    return h;
+}
+#endif // HASHTEST
+
 
 int main(void) {
     htab_t *t = htab_init(HTAB_SIZE);

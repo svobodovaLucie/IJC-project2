@@ -1,6 +1,10 @@
+# Makefile
+# Řešení IJC-DU2, 08.04.2021
+# Autor: Lucie Svobodová, FIT
+
 CC= gcc
 EXEC= tail wordcount wordcount-dynamic
-CFLAGS= -std=c99  -pedantic -Wall -Wextra -g -pg
+CFLAGS= -std=c99  -pedantic -Wall -Wextra
 
 OBJECT= htab_bucket_count.o htab_clear.o htab_erase.o htab_find.o htab_for_each.o htab_free.o htab_hash_function.o htab_init.o htab_lookup_add.o htab_move.o htab_size.o
 LIBS= htab.h htab_structs.h
@@ -63,9 +67,4 @@ libhtab.so: $(OBJECT)
 
 clean:
 	rm $(EXEC) *.o libhtab.so libhtab.a
-
-run: tail
-	./tail
-
-add_git:
-	git add *.h *.c *.cc Makefile
+	
