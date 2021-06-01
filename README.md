@@ -1,5 +1,9 @@
 IJC 2020/2021 FIT VUT - Projekt 2
 
+Hodnocení: 14,5/15
+
+Detail k hodnocení: Program wordcount nie je staticky zostaveny (chyba -static) (-0.5)
+
 Jazyk C                       DU2                      23.3.2021
 ----------------------------------------------------------------
 
